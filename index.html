@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- displays site properly based on user's device -->
+
+  <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png" />
+
+  <title>Frontend Mentor | Time tracking dashboard</title>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <main>
+    <div id="container" class="container">
+      <div class="card-profile">
+        <div class="profile">
+          <img src="images/image-jeremy.png" alt="" />
+          <div class="profile-text">
+            <span>Report for</span>
+            <h1>Jeremy Robson</h1>
+          </div>
+        </div>
+        <div class="profile-links">
+          <ul id="links" class="links">
+            <li class="item">Daily</li>
+            <li class="item active">Weekly</li>
+            <li class="item">Monthly</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script>
+    const container = document.getElementById("container")
+
+    const links = document.getElementById("links")
+    links.addEventListener("click", (e) => {
+
+      if (e.target && e.target.matches(".item")) {
+
+        const items = document.querySelectorAll(".item")
+        items.forEach((item) => {
+          item.classList.remove("active")
+        })
+        e.target.classList.add("active")
+        const time = e.target.textContent.toLowerCase()
+        getData(time)
+      }
+
+    })
+
+    const getData = (time = 'weekly') => {
+      fetch("data.json")
+        .then((response) => response.json())
+        .then((data) => {
+          createCard(data, time)
+        })
+        .catch((error) => {
+          console.error("Error al obtener los datos:", error)
+        })
+    }
+
+    const createCard = (data, time) => {
+      const cardTime = document.querySelectorAll("#cardTime")
+      cardTime.forEach(card => {
+        card.remove()
+      })
+
+      data.forEach((key) => {
+        const { title, timeframes } = key
+        const currentTime = timeframes[time].current
+        const previousTime = timeframes[time].previous
+
+        let titleIcon = title.trim().split(" ")
+        if (titleIcon.length === 2) {
+          titleIcon = titleIcon[0] + "-" + titleIcon[1]
+        } else {
+          titleIcon = titleIcon[0]
+        }
+        const imageSrc = `images/icon-${titleIcon.toLowerCase()}.svg`
+        const cardBg = `card-bg-${titleIcon.toLowerCase()}`
+
+        const card = document.createElement("div")
+        card.id = "cardTime"
+        card.classList.add("card", cardBg)
+        card.innerHTML = `
+              <div class="card-image">
+                <img src="${imageSrc}" alt="" />
+              </div>
+             <div class="card-content">
+                <div class="activity">
+                  <div class="activity-title">${title}</div>
+                      <svg class="icon-others" width="21" height="5" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 0a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Zm8 0a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Zm8 0a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z"  fill="currentColor"/></svg>
+                </div>
+                <div class="activity-time">
+                  <div class="current-time">${currentTime}hrs</div>
+                  <div class="previous-time">Previous - ${previousTime}hrs</div>
+                </div>
+              </div>
+            `
+        container.appendChild(card)
+      })
+    }
+
+    getData()
+
+  </script>
+</body>
+
+</html>
